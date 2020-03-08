@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<head>
+   <title>Kiosk</title>
+   <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+   <link rel="stylesheet" href="/static/css/light_control.css">
+   <script src="/static/js/jquery.min.js"></script>
+</head>
+
+<body>
+<div id="wrapper">
+	<div class="row">
+		<h3 id="time_span" style="margin-top:-10px; margin-bottom:20px;margin-left:auto;margin-right:20px;">
+			00:00
+		</h3>
+	</div>
+	<div class="row">
+		<div class="column">
+			<h2>Kitchen</h2>
+			   <ul style="list-style-type:none;">
+				   <li><a href="#" id="kitchen_off" class="kitchen off btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('kitchen', 'off', 'False');">Off</a></li>
+				   <li><a href="#" id="kitchen_on" class="kitchen on btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('kitchen', 'color', 'white');">On</a></li>
+				   <!--<li><a href="#" class="btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('kitchen', 'ct', '5507');">Cool</a></li>-->
+				   <!--<li><a href="#" class="btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('bulb', 'color', 'green');">Green</a></li>-->
+			   </ul>
+			
+		</div>
+		<div class="column">
+			<h2>Bedroom</h2>
+			
+			   <ul style="list-style-type:none;">
+				   <li><a href="#" id="bedroom_off" class="bedroom off btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('bedroom', 'off', 'False');">Off</a></li>
+				   <li><a href="#" id="bedroom_on" class="bedroom on btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('bedroom', 'ct', '3806');">On</a></li>
+				   <li><a href="#" id="bedroom_night" class="bedroom night btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('bedroom', 'mode', 'night');">Night mode</a></li>
+				   <li><a href="#" id="bedroom_cool" class="bedroom cool btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('bedroom', 'ct', '5507');">Cool</a></li>
+			   </ul>
+			
+		</div>
+		<div class="column">
+			<h2>Lamp</h2>
+			
+			   <ul style="list-style-type:none;">
+				   <li><a href="#" id="lamp_off" class="lamp off btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('lamp', 'off', 'False');">Off</a></li>
+				   <li><a href="#" id="lamp_on" class="lamp on btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('lamp', 'ct', '3806');">On</a></li>
+				   <li><a href="#" id="lamp_warm" class="lamp warm btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('lamp', 'ct', '3116');">Warm</a></li>
+				   <li><a href="#" id="lamp_cool" class="lamp cool btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('lamp', 'ct', '5507');">Cool</a></li>
+			   </ul>
+			
+		</div>
+		<div class="column">
+			<h2>All</h2>
+			
+			   <ul style="list-style-type:none;">
+				   <li><a href="#" class="btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('all', 'off', 'False');">All Off</a></li>
+				   <!--<li><a href="#" class="btn btn-block btn-lg btn-default basic-button" role="button" onclick="fun('False', 'blank-display', 'False');">Display Off</a></li>-->
+			   </ul>
+			
+		</div>
+	</div>
+	
+   <!-- <p>
+         <form action="http://192.168.1.138:5000/bulb/color/green" method="GET">
+			<button name="foo" value="upvote">Upvote</button>
+		 </form>
+   </p>
+   <p>
+    <form method="get">
+	  <button id="button_1" value="blue" name="but1">blue</button>
+	  <button id="button_2" value="green" name="but2">green</button>
+	  <input id="access_token" type="hidden" name="access_token" value="test" />
+	</form>
+   </p> -->
+</div>
+<script>
+function fun(bulb, action, param) {
+  // e.preventDefault();
+  $.ajax({
+        type: "GET",
+        url: "/yee",
+        data: { 
+            bulb: bulb,
+			action: action,
+			param: param,
+			
+        },
+        success: function(result) {
+			//console.log("I am trying to get bulb info!");
+			get_bulb_info(bulb, true);
+            //alert('ok');
+        },
+        error: function(result) {
+            //alert('error');
+        }
+    });
+	
+	
+}
+
+function get_bulb_info(bulb_name='all', single=false) {
+	// Requests and processes status of a specific bulb (or all of them)
+	$.getJSON( "/status/"+bulb_name, function( data ) {
+	
+	    // Find which buttons should be active (can take a long time!)
+		var elems = []  // define this variable to be accessible after for loop
+		var bulbs_to_off = []
+		$.each( data, function( key, val ) {
+			// find which buttons to turn on
+			var qs = "."+val+"."+key;
+			bulbs_to_off.push(key);
+			//console.log(qs);
+			elems.push(document.querySelectorAll(qs));
+			//console.log(elems);
+		});
+		//console.log(bulbs_to_off);
+			
+		// Turn off all buttons of this bulb
+		// TODO: move to a separate function
+		for (i in bulbs_to_off) {
+			var qs2 = ".btn-primary."+bulbs_to_off[i];
+			//console.log(qs2);
+			var elems2 = document.querySelectorAll(qs2);
+			[].forEach.call(elems2, function(el) {
+				el.classList.remove("btn-primary");
+			});
+		}
+		
+		// Activate the newly active button(s)
+		for (j in elems) {
+			[].forEach.call(elems[j], function(el) {
+				el.classList.add("btn-primary");
+			});
+		}
+		
+		// Unless said otherwise, run again in 10 seconds
+		if (!single) {
+			setTimeout(get_bulb_info, 10000);
+		}
+		
+	});
+}
+
+function updateTime(){
+    var currentTime = new Date()
+    var hours = currentTime.getHours()
+    var minutes = currentTime.getMinutes()
+    if (minutes < 10){
+        minutes = "0" + minutes
+    }
+    var t_str = hours + ":" + minutes + " ";
+    //if(hours > 11){
+    //    t_str += "PM";
+    //} else {
+    //    t_str += "AM";
+    //}
+    document.getElementById('time_span').innerHTML = t_str;
+}
+
+
+$(document).ready(function () {
+  // Code that will run once the entire DOM is loaded into the browser
+  get_bulb_info();
+  setInterval(updateTime, 1000);
+});
+
+
+</script>
+   
+</body>
+</html>
+

@@ -1,0 +1,22 @@
+
+## Automatically blank the screen every 60 seconds
+sudo nano /etc/rc.local
+
+> Add just before 'exit 0'
+# Run the pi-touchsecrren-timeout script
+# A automatically blank the screen every 30s and wake up on tap
+/home/pi/rpi-home-control/pi-touchscreen-timeout/timeout 60 event0 &
+
+## Try to remove the cursor
+sudo nano /etc/lightdm/lightdm.conf
+
+> Modify
+# Trying to completely remove the cursor
+xserver-command = X -nocursor
+
+## Create gunicorn and kiosk services
+cp /home/pi/rpi-home-control/setup/web.service /etc/systemd/system/web.service
+cp /home/pi/rpi-home-control/setup/kiosk.service /lib/systemd/system/kiosk.service
+
+# Activate venv
+source webenv/bin/activate

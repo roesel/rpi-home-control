@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#wrapper {
+	background:#E8E8E8;
+	width:800px;
+	/* 800x480 */
+	height:480px;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:0;
+	padding: 20px 20px 20px 20px;
+}
+
+.column {
+	text-align:center;
+	width:150px;
+	height:100%;
+	display: block;
+	float:left;
+	margin-left:10px;
+	margin-right:10px;
+}
+
+h2 {
+	margin-top:0px;
+	margin-bottom:20px;
+}
+
+ul {
+	padding-left:0px;
+}
+
+.basic-button {
+	width:150px;
+	margin-bottom:20px;
+}

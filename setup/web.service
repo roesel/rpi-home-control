@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve the kiosk web app
+After=network.target
+
+[Service]
+User=pi
+Group=www-data
+WorkingDirectory=/home/pi/rpi-home-control
+Environment="PATH=/home/pi/rpi-home-control/webenv/bin"
+ExecStart=/home/pi/rpi-home-control/webenv/bin/gunicorn --workers 3 --bind unix:web.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
