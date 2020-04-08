@@ -1,3 +1,4 @@
 gunicorn
 flask
 yeelight
+Adafruit_DHT

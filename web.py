@@ -5,11 +5,18 @@ app = Flask(__name__, static_url_path='/static')
 from yeelight import Bulb
 import json
 
+import Adafruit_DHT
+
 b = {
     "bedroom" : Bulb("192.168.1.66"),
     "lamp"    : Bulb("192.168.1.67"),
     "kitchen" : Bulb("192.168.1.68"),
 }
+
+@app.route("/humitemp")
+def get_humi_temp():
+    humidity, temperature = Adafruit_DHT.read_retry(11, 4)
+    return '{} °C<br/>{} %'.format(int(temperature), int(humidity))
 
 def set_color(bid, color):
     if color=='red':
