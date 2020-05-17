@@ -3,20 +3,22 @@ from flask import Flask, render_template, request, jsonify, abort
 app = Flask(__name__, static_url_path='/static')
 
 from yeelight import Bulb
+from sonoff import Switch
 import json
 
 import Adafruit_DHT
+
+# eWe link api key: b1aca638-0da2-483d-a10b-30f323d431f3
 
 b = {
     "bedroom" : Bulb("192.168.1.66"),
     "lamp"    : Bulb("192.168.1.67"),
     "kitchen" : Bulb("192.168.1.68"),
+    "couch" : Switch(host = "192.168.1.65", api_key = "7ba6977a-5cdd-4afa-9774-528fd9e28439", device_id="1000416b19"),
+    "armchair" : Switch(host = "192.168.1.64", api_key = "d70cdd56-4aac-483a-aa68-1c791a6512ae", device_id="1000839445"),
 }
 
-@app.route("/humitemp")
-def get_humi_temp():
-    humidity, temperature = Adafruit_DHT.read_retry(11, 4)
-    return '{} °C<br/>{} %'.format(int(temperature), int(humidity))
+
 
 def set_color(bid, color):
     if color=='red':
@@ -53,6 +55,11 @@ def set(bid, status):
 def main():
     ''' Main touch-compatible screen with all the controls. '''
     return render_template('light_control.html')
+
+@app.route("/humitemp")
+def get_humi_temp():
+    humidity, temperature = Adafruit_DHT.read_retry(11, 4)
+    return '{} °C<br/>{} %'.format(int(temperature), int(humidity))
 
 @app.route('/yee', methods=['GET']) 
 def yee():
@@ -91,9 +98,7 @@ def get_status(bn, p):
     if p['power'] == 'off':
         out = 'off'
     else:
-        if bn == 'kitchen':
-            out = p['power']  # this should always be 'on'
-        elif bn == 'lamp':
+        if bn == 'lamp':
             if p['ct'] == '3116':
                 out = 'warm'
             elif p['ct'] == '5507':
@@ -107,7 +112,11 @@ def get_status(bn, p):
                 out = 'cool'
             else:
                 out = 'on'
-   
+        #if bn in ['kitchen', 'couch']:
+        else:
+            out = p['power']  # this should always be 'on'
+        
+                
     return out
     
 @app.route('/status/<bulb_name>')
@@ -121,10 +130,11 @@ def status(bulb_name):
     for bn in bulbs:
         if bn in b:
             try:
+            # TODO Handle for case of Sonoff
                 p = b[bn].get_properties()
                 out[bn] = get_status(bn, p)
             except:# yeelight.main.BulbException:
-                print('Bulb unreachable.')
+                print('Bulb "{}" unreachable.'.format(bn))
                 out[bn] = "offline"
         else:
             print('Requested bulb not found.')
